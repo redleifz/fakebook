@@ -92,7 +92,7 @@ const LoginScreen = () => {
           </span>
           <hr className="w-[900px] mt-1" />
           <span className="text-sm mt-1">
-            Sign UpLog inMessengerFacebook LiteWatchPlacesGamesMarketplaceMeta
+            Sign UpLog inMessengerFakebook LiteWatchPlacesGamesMarketplaceMeta
             PayOculusPortalInstagramBulletinFundraisers
           </span>
         </div>

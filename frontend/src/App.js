@@ -16,7 +16,7 @@ function App() {
         <Route
           exact
           path="/"
-          element={userInfo.token ? <HomeScreen /> : <LoginScreen />}
+          element={userInfo ? <HomeScreen /> : <LoginScreen />}
         />
       </Routes>
     </BrowserRouter>

@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { useContext, useState } from "react";
 import Modal from "react-modal";
-import { useNavigate } from "react-router-dom";
 import { URL } from "../App";
 import { Store } from "../Store";
 
@@ -35,12 +34,20 @@ const LoginScreen = () => {
   const rootEl = document.getElementById("root");
   let currentYear = new Date().getFullYear();
 
-  const navigate = useNavigate();
+  const [signinEmail, setSigninEmail] = useState("");
+  const [signinPassword, setSigninPassword] = useState("");
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [signupFirstName, setSignupFirstName] = useState("");
+  const [signupSurName, setSignupSurName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
+  const [signupDateOfBirth, setSignupDateOfBirth] = useState("1");
+  const [signupMonthOfBirth, setSignupMonthOfBirth] = useState("");
+  const [signupYearOfBirth, setSignupYearOfBirth] = useState("");
+  const [signupGender, setSignupGender] = useState("male");
 
-  const { state, dispatch: ctxDispatch } = useContext(Store);
+  const { dispatch: ctxDispatch } = useContext(Store);
 
   const [modalIsOpen, setIsOpen] = useState(false);
 
@@ -52,19 +59,46 @@ const LoginScreen = () => {
     setIsOpen(false);
   }
 
-  const submitHandler = async (e) => {
-    console.log("submit");
+  const loginHandler = async (e) => {
+    // console.log("login");
     e.preventDefault();
     try {
       const { data } = await axios.post(`${URL}/api/users/signin`, {
-        email,
-        password,
+        signinEmail,
+        signinPassword,
       });
       ctxDispatch({ type: "USER_SIGNIN", payload: data });
       localStorage.setItem("userInfo", JSON.stringify(data));
       window.location.href = "/";
     } catch (err) {
       alert("Invalid email or password");
+    }
+  };
+
+  const signinHandler = async (e) => {
+    e.preventDefault();
+
+    if (signupPassword !== signupConfirmPassword) {
+      window.alert("your password is not match");
+    } else {
+      try {
+        const date = signupDateOfBirth;
+        const month = signupMonthOfBirth;
+        const year = signupYearOfBirth;
+        const dateOfBirth = year + `-` + month + `-` + date;
+
+        const { data } = await axios.post(`${URL}/api/users/signup`, {
+          signupFirstName,
+          signupSurName,
+          signupEmail,
+          signupPassword,
+          dateOfBirth,
+          signupGender,
+        });
+        ctxDispatch({ type: "USER_SIGNIN", payload: data });
+        localStorage.setItem("userInfo", JSON.stringify(data));
+        window.location.href = "/";
+      } catch (err) {}
     }
   };
 
@@ -82,18 +116,18 @@ const LoginScreen = () => {
           </div>
           <div className="flex flex-col items-center">
             <div className="bg-white mt-10 lg:mt-0 w-[350px] h-[340px] rounded-lg shadow-lg flex flex-col items-center">
-              <form className="flex flex-col" onSubmit={submitHandler}>
+              <form className="flex flex-col" onSubmit={loginHandler}>
                 <input
                   className="w-[320px] h-[50px] mt-4 rounded-lg border-2 text-lg px-3"
                   placeholder="Email address"
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setSigninEmail(e.target.value)}
                   type="email"
                   required
                 />
                 <input
                   className="w-[320px] h-[50px] mt-3 rounded-lg border-2 text-lg px-3"
                   placeholder="Password"
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setSigninPassword(e.target.value)}
                   type="password"
                   required
                 />
@@ -152,30 +186,49 @@ const LoginScreen = () => {
               {" "}
               <span>It's quick and easy.</span>
             </div>
-            <form>
+            <form onSubmit={signinHandler}>
               <div className="flex justify-between pt-3">
                 {" "}
                 <input
                   placeholder="First name"
-                  className="bg-gray-50 border-slate-400 border-[1px]  h-[35px] rounded-sm text-md w-[49%] placeholder:pl-2 py-2"
+                  className="bg-gray-50 border-slate-400 border-[1px]  h-[35px] rounded-sm text-md w-[49%] pl-2"
+                  onChange={(e) => setSignupFirstName(e.target.value)}
+                  required
                 />
                 <input
                   placeholder="Surname"
-                  className="bg-gray-50 border-slate-400 border-[1px]  h-[35px] rounded-sm text-md w-[49%] placeholder:pl-2"
+                  className="bg-gray-50 border-slate-400 border-[1px]  h-[35px] rounded-sm text-md w-[49%] pl-2"
+                  onChange={(e) => setSignupSurName(e.target.value)}
+                  required
                 />
               </div>
               <div className="flex flex-col pt-3">
                 <input
+                  onChange={(e) => setSignupEmail(e.target.value)}
                   placeholder="Email Address"
-                  className="bg-gray-50 border-slate-400 border-[1px] h-[35px] rounded-sm text-md w-full placeholder:pl-2 "
+                  className="bg-gray-50 border-slate-400 border-[1px] h-[35px] rounded-sm text-md w-full pl-2"
+                  required
+                  type="email"
                 />
                 <input
+                  onChange={(e) => setSignupPassword(e.target.value)}
                   placeholder="New password"
-                  className="bg-gray-50 mt-3  border-slate-400 border-[1px] h-[35px] rounded-sm text-md w-full placeholder:pl-2 "
+                  className="bg-gray-50 mt-3  border-slate-400 border-[1px] h-[35px] rounded-sm text-md w-full pl-2"
+                  required
+                  type="password"
+                />
+                <input
+                  onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                  placeholder="Confirm password"
+                  type="password"
+                  className="bg-gray-50 mt-3  border-slate-400 border-[1px] h-[35px] rounded-sm text-md w-full pl-2"
                 />
                 <label className="text-sm pt-3">Date of birth</label>
                 <div className="flex flex-row justify-between">
-                  <select className="bg-gray-50 mt-2 rounded-sm border-slate-400 border-[1px] pl-1 w-[120px]">
+                  <select
+                    onChange={(e) => setSignupDateOfBirth(e.target.value)}
+                    className="bg-gray-50 mt-2 rounded-sm border-slate-400 border-[1px] pl-1 w-[120px]"
+                  >
                     {Array.from({ length: 31 }, (_, i) => i + 1).map(
                       (number) => (
                         <option key={number} value={number}>
@@ -184,14 +237,20 @@ const LoginScreen = () => {
                       )
                     )}
                   </select>
-                  <select className="bg-gray-50 mt-2 rounded-sm border-slate-400 border-[1px] pl-1 w-[120px]">
+                  <select
+                    className="bg-gray-50 mt-2 rounded-sm border-slate-400 border-[1px] pl-1 w-[120px]"
+                    onChange={(e) => setSignupMonthOfBirth(e.target.value)}
+                  >
                     {months.map((month) => (
                       <option key={month} value={month}>
                         {month}
                       </option>
                     ))}
                   </select>
-                  <select className="bg-gray-50 mt-2 rounded-sm border-slate-400 border-[1px] pl-1 w-[120px]">
+                  <select
+                    className="bg-gray-50 mt-2 rounded-sm border-slate-400 border-[1px] pl-1 w-[120px]"
+                    onChange={(e) => setSignupYearOfBirth(e.target.value)}
+                  >
                     {Array.from(
                       { length: currentYear - (currentYear - 140) },
                       (_, i) => currentYear - i
@@ -202,7 +261,7 @@ const LoginScreen = () => {
                     ))}
                   </select>
                 </div>
-                <label className="text-sm pt-3">Date of birth</label>
+                <label className="text-sm pt-3">Gender</label>
                 <div className="flex flex-row justify-between">
                   <div className="bg-gray-50 mt-2 rounded-sm border-slate-400 border-[1px] w-[120px] flex justify-between">
                     <label htmlFor="Male" className="pl-2">
@@ -211,9 +270,9 @@ const LoginScreen = () => {
                     <input
                       className="mr-2"
                       type="radio"
-                      id="male"
-                      name="gender"
                       value="male"
+                      checked={signupGender === "male"}
+                      onChange={(e) => setSignupGender(e.target.value)}
                     />
                   </div>
                   <div className="bg-gray-50 mt-2 rounded-sm border-slate-400 border-[1px] w-[120px] flex justify-between">
@@ -223,9 +282,9 @@ const LoginScreen = () => {
                     <input
                       className="mr-2"
                       type="radio"
-                      id="female"
-                      name="gender"
                       value="female"
+                      checked={signupGender === "female"}
+                      onChange={(e) => setSignupGender(e.target.value)}
                     />
                   </div>
                   <div className="bg-gray-50 mt-2 rounded-sm border-slate-400 border-[1px] w-[120px] flex justify-between">
@@ -235,9 +294,9 @@ const LoginScreen = () => {
                     <input
                       className="mr-2"
                       type="radio"
-                      id="other"
-                      name="gender"
                       value="other"
+                      checked={signupGender === "other"}
+                      onChange={(e) => setSignupGender(e.target.value)}
                     />
                   </div>
                 </div>
@@ -253,7 +312,11 @@ const LoginScreen = () => {
               </p>
               <div className="flex justify-center mt-4">
                 {" "}
-                <button className="text-white bg-green-600 font-bold py-2 w-[200px] rounded-md">
+                <button
+                  className="text-white bg-green-600 font-bold py-2 w-[200px] rounded-md"
+                  type="submit"
+                  value="Submit"
+                >
                   Sign Up
                 </button>
               </div>

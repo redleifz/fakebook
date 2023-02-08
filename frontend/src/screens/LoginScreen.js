@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useContext, useState } from "react";
 import Modal from "react-modal";
+import { useNavigate } from "react-router-dom";
+import { URL } from "../App";
+import { Store } from "../Store";
 
 const customStyles = {
   content: {
@@ -28,10 +32,15 @@ const months = [
 ];
 
 const LoginScreen = () => {
-
-
-  const rootEl = document.getElementById('root');
+  const rootEl = document.getElementById("root");
   let currentYear = new Date().getFullYear();
+
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const { state, dispatch: ctxDispatch } = useContext(Store);
 
   const [modalIsOpen, setIsOpen] = useState(false);
 
@@ -39,39 +48,66 @@ const LoginScreen = () => {
     setIsOpen(true);
   }
 
-  function afterOpenModal() {
-
-  }
-
   function closeModal() {
     setIsOpen(false);
   }
+
+  const submitHandler = async (e) => {
+    console.log("submit");
+    e.preventDefault();
+    try {
+      const { data } = await axios.post(`${URL}/api/users/signin`, {
+        email,
+        password,
+      });
+      ctxDispatch({ type: "USER_SIGNIN", payload: data });
+      localStorage.setItem("userInfo", JSON.stringify(data));
+      window.location.href = "/";
+    } catch (err) {
+      alert("Invalid email or password");
+    }
+  };
 
   return (
     <>
       <div className="bg-slate-100 w-full h-screen">
         <div className="lg:grid-cols-2 grid pt-10 h-[80%] items-center lg:items-start lg:pt-[10rem]">
           <div className="flex flex-col items-center text-center lg:pl-10">
-            <span className="text-red-500 font-bold text-5xl">fakebook</span>
+            <span className="text-red-500 font-bold text-5xl uppercase">
+              fakebook
+            </span>
             <span className="text-2xl px-3 pt-3">
               Fakebook helps you connect and share with the people in your life.
             </span>
           </div>
           <div className="flex flex-col items-center">
             <div className="bg-white mt-10 lg:mt-0 w-[350px] h-[340px] rounded-lg shadow-lg flex flex-col items-center">
-              <input
-                className="w-[320px] h-[50px] mt-4 rounded-lg border-2 text-lg placeholder:pl-3"
-                placeholder="Email address"
-              />
-              <input
-                className="w-[320px] h-[50px] mt-3 rounded-lg border-2 text-lg placeholder:pl-3"
-                placeholder="Password"
-              />
-              <button className="w-[320px] h-[50px] mt-3 rounded-lg bg-blue-600 text-white text-xl font-bold">
-                Log in
-              </button>
+              <form className="flex flex-col" onSubmit={submitHandler}>
+                <input
+                  className="w-[320px] h-[50px] mt-4 rounded-lg border-2 text-lg px-3"
+                  placeholder="Email address"
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  required
+                />
+                <input
+                  className="w-[320px] h-[50px] mt-3 rounded-lg border-2 text-lg px-3"
+                  placeholder="Password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  type="password"
+                  required
+                />
+                <button
+                  className="w-[320px] h-[50px] mt-3 rounded-lg bg-blue-600 text-white text-xl font-bold"
+                  type="submit"
+                  value="Submit"
+                >
+                  Log in
+                </button>
+              </form>
               <span className="text-blue-500 mt-3">Forgotten password?</span>
               <hr className="w-[80%] mt-3" />
+
               <button
                 className="w-[230px] h-[50px] mt-6 rounded-lg bg-green-600 text-white text-xl font-bold"
                 onClick={openModal}
@@ -98,7 +134,6 @@ const LoginScreen = () => {
         </div>
         <Modal
           isOpen={modalIsOpen}
-          onAfterOpen={afterOpenModal}
           onRequestClose={closeModal}
           style={customStyles}
           contentLabel="#main"
@@ -195,7 +230,7 @@ const LoginScreen = () => {
                   </div>
                   <div className="bg-gray-50 mt-2 rounded-sm border-slate-400 border-[1px] w-[120px] flex justify-between">
                     <label htmlFor="Other" className="pl-2">
-                    Other
+                      Other
                     </label>
                     <input
                       className="mr-2"
